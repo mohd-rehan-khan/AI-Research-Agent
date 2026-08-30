@@ -1,4 +1,4 @@
-# Source-grounded research agent
+# Source-grounded Research Agent
 
 A small Python research agent that answers a question by choosing among three tools:
 
