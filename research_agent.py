@@ -175,6 +175,33 @@ class SummarizeTool:
 Tool = Callable[..., Any]
 
 
+def is_research_question(question: str) -> bool:
+    """Return True only for prompts that look like factual research questions."""
+    text = " ".join(question.strip().split())
+    if not text:
+        return False
+    lowered = text.lower()
+    if "?" in text:
+        return True
+
+    wh_words = (
+        "what",
+        "why",
+        "how",
+        "when",
+        "where",
+        "who",
+        "which",
+        "whether",
+        "compare",
+        "contrast",
+        "explain",
+        "describe",
+        "summarize",
+    )
+    return any(keyword in lowered for keyword in wh_words)
+
+
 class ResearchAgent:
     """Decides the next tool from state and stops after max_steps."""
 
@@ -192,6 +219,11 @@ class ResearchAgent:
 
     def run(self, question: str) -> AgentState:
         state = AgentState(question=question, max_steps=self.max_steps)
+        if not is_research_question(question):
+            state.answer = "I can only answer research questions."
+            state.phase = "done"
+            return state
+
         while state.step < state.max_steps and state.phase != "done":
             state.step += 1
             if state.phase == "search":

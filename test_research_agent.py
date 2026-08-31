@@ -27,6 +27,13 @@ class FailingFetch:
 
 
 class ResearchAgentTests(unittest.TestCase):
+    def test_rejects_non_research_requests(self):
+        agent = ResearchAgent(search=FakeSearch(), fetch=FakeFetch(), max_steps=4)
+        state = agent.run("make a code")
+        self.assertEqual(state.answer, "I can only answer research questions.")
+        self.assertEqual(state.phase, "done")
+        self.assertEqual(len(state.sources), 0)
+
     def test_tool_loop_fetches_and_cites_every_claim(self):
         agent = ResearchAgent(search=FakeSearch(), fetch=FakeFetch(), max_steps=4)
         state = agent.run("How does solar power work?")
@@ -36,7 +43,7 @@ class ResearchAgentTests(unittest.TestCase):
 
     def test_step_budget_prevents_infinite_loop(self):
         agent = ResearchAgent(search=FakeSearch(), fetch=FakeFetch(), max_steps=2)
-        state = agent.run("question")
+        state = agent.run("How does solar power work?")
         self.assertEqual(state.step, 2)
         self.assertIn("step budget exhausted", " ".join(state.errors))
 
@@ -49,7 +56,7 @@ class ResearchAgentTests(unittest.TestCase):
 
     def test_failed_fetch_is_reported_gracefully(self):
         agent = ResearchAgent(search=FakeSearch(), fetch=FailingFetch(), max_steps=4)
-        state = agent.run("question")
+        state = agent.run("How does solar power work?")
         self.assertEqual(state.answer, "No answer available.")
         self.assertTrue(any("fetch_page failed" in error for error in state.errors))
 
