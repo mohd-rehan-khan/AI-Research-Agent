@@ -282,6 +282,28 @@ def format_report(state: AgentState) -> str:
     return "\n".join(lines)
 
 
+def run_research(question: str, max_steps: int = 8) -> dict:
+    """Run the research agent for the web interface."""
+
+    state = ResearchAgent(max_steps=max_steps).run(question)
+
+    return {
+        "question": state.question,
+        "answer": state.answer,
+        "sources": [
+            {
+                "id": source.source_id,
+                "title": source.title,
+                "url": source.url
+            }
+            for source in state.sources
+        ],
+        "notes": state.notes,
+        "errors": state.errors,
+        "steps": state.step
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Answer a research question with fetched-source citations.")
     parser.add_argument("question", nargs="+", help="the research question")

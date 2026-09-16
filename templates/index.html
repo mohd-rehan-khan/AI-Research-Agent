@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Research Agent</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #212121;
+            color: #ececec;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================= */
+
+        .sidebar {
+            width: 260px;
+            background: #171717;
+            border-right: 1px solid #2f2f2f;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 600;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .new-chat {
+            width: 100%;
+            background: transparent;
+            border: 1px solid #444;
+            color: #ececec;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        .new-chat:hover {
+            background: #2a2a2a;
+        }
+
+        .sidebar-text {
+            margin: 25px 12px;
+            font-size: 13px;
+            color: #9b9b9b;
+            line-height: 1.5;
+        }
+
+        /* =========================
+           MAIN AREA
+        ========================= */
+
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: #212121;
+        }
+
+        .header {
+            height: 60px;
+            border-bottom: 1px solid #2f2f2f;
+            display: flex;
+            align-items: center;
+            padding: 0 25px;
+            font-size: 16px;
+            font-weight: 600;
+            background: #212121;
+        }
+
+        /* =========================
+           CHAT AREA
+        ========================= */
+
+        .chat {
+            flex: 1;
+            overflow-y: auto;
+            padding: 35px 15%;
+            scroll-behavior: smooth;
+        }
+
+        .welcome {
+            text-align: center;
+            margin-top: 18vh;
+        }
+
+        .welcome h1 {
+            font-size: 30px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #ececec;
+        }
+
+        .welcome p {
+            color: #9b9b9b;
+            font-size: 15px;
+        }
+
+        /* =========================
+           MESSAGES
+        ========================= */
+
+        .message {
+            margin-bottom: 30px;
+            line-height: 1.7;
+        }
+
+        .user-message {
+            background: #2f2f2f;
+            padding: 14px 18px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            color: #ececec;
+        }
+
+        .answer {
+            padding: 5px 18px;
+            color: #ececec;
+        }
+
+        .answer p {
+            margin-top: 10px;
+            white-space: pre-wrap;
+        }
+
+        /* =========================
+           SOURCES
+        ========================= */
+
+        .sources {
+            margin-top: 20px;
+            padding: 16px;
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 10px;
+        }
+
+        .sources h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+
+        .sources a {
+            display: block;
+            color: #8ab4f8;
+            text-decoration: none;
+            margin: 9px 0;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .sources a:hover {
+            text-decoration: underline;
+        }
+
+        /* =========================
+           LOADING
+        ========================= */
+
+        .loading {
+            display: none;
+            color: #9b9b9b;
+            margin-bottom: 15px;
+            padding: 0 15%;
+            font-size: 14px;
+        }
+
+        /* =========================
+           INPUT
+        ========================= */
+
+        .input-area {
+            padding: 18px 15px 22px;
+            background: #212121;
+        }
+
+        .input-box {
+            max-width: 850px;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            background: #2f2f2f;
+            border: 1px solid #555;
+            border-radius: 14px;
+            padding: 7px 8px 7px 16px;
+        }
+
+        .input-box:focus-within {
+            border-color: #777;
+        }
+
+        .input-box input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #ececec;
+            font-size: 15px;
+            padding: 11px 0;
+        }
+
+        .input-box input::placeholder {
+            color: #9b9b9b;
+        }
+
+        .send-button {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 10px;
+            background: #ffffff;
+            color: #171717;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .send-button:hover {
+            background: #dcdcdc;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 11px;
+            color: #777;
+            margin-top: 9px;
+        }
+
+        /* =========================
+           SCROLLBAR
+        ========================= */
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #212121;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 800px) {
+
+            .sidebar {
+                display: none;
+            }
+
+            .chat {
+                padding: 30px 5%;
+            }
+
+            .loading {
+                padding: 0 5%;
+            }
+
+            .welcome h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+
+<body>
+
+    <!-- =========================
+         SIDEBAR
+    ========================= -->
+
+    <div class="sidebar">
+
+        <div class="logo">
+            🔎 AI Research Agent
+        </div>
+
+        <button class="new-chat" onclick="newChat()">
+            + New Research
+        </button>
+
+        <div class="sidebar-text">
+            Ask a research question and the agent will search the web,
+            analyze sources, and provide an answer with citations.
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         MAIN
+    ========================= -->
+
+    <div class="main">
+
+        <div class="header">
+            AI Research Agent
+        </div>
+
+
+        <!-- CHAT -->
+
+        <div class="chat" id="chat">
+
+            <div class="welcome" id="welcome">
+
+                <h1>What do you want to research?</h1>
+
+                <p>
+                    Ask a question and I'll search the web for you.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- LOADING -->
+
+        <div class="loading" id="loading">
+            🔎 Researching your question...
+        </div>
+
+
+        <!-- INPUT -->
+
+        <div class="input-area">
+
+            <div class="input-box">
+
+                <input
+                    type="text"
+                    id="question"
+                    placeholder="Ask a research question..."
+                    onkeydown="handleKey(event)"
+                >
+
+                <button
+                    class="send-button"
+                    onclick="askQuestion()"
+                >
+                    ↑
+                </button>
+
+            </div>
+
+            <div class="footer">
+                AI Research Agent may make mistakes.
+                Check the sources for important information.
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================= -->
+
+    <script>
+
+        function handleKey(event) {
+
+            if (event.key === "Enter") {
+                askQuestion();
+            }
+
+        }
+
+
+        async function askQuestion() {
+
+            const input = document.getElementById("question");
+
+            const question = input.value.trim();
+
+            if (!question) {
+                return;
+            }
+
+
+            const chat = document.getElementById("chat");
+
+            const welcome = document.getElementById("welcome");
+
+            const loading = document.getElementById("loading");
+
+
+            // Remove welcome message
+
+            if (welcome) {
+                welcome.remove();
+            }
+
+
+            // Display user question
+
+            const userMessage = document.createElement("div");
+
+            userMessage.className = "message";
+
+            userMessage.innerHTML = `
+                <div class="user-message">
+                    <strong>You</strong><br>
+                    ${escapeHtml(question)}
+                </div>
+            `;
+
+            chat.appendChild(userMessage);
+
+
+            // Clear input
+
+            input.value = "";
+
+
+            // Show loading
+
+            loading.style.display = "block";
+
+            chat.scrollTop = chat.scrollHeight;
+
+
+            try {
+
+                const response = await fetch("/research", {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        question: question
+                    })
+
+                });
+
+
+                const data = await response.json();
+
+
+                loading.style.display = "none";
+
+
+                if (!data.success) {
+
+                    showError(data.error);
+
+                    return;
+
+                }
+
+
+                // Prepare sources
+
+                let sourcesHTML = "";
+
+
+                if (data.sources && data.sources.length > 0) {
+
+                    sourcesHTML = `
+                        <div class="sources">
+
+                            <h3>Sources</h3>
+
+                            ${data.sources.map(source => `
+                                <a
+                                    href="${source.url}"
+                                    target="_blank"
+                                >
+                                    [${source.id}]
+                                    ${source.title}
+                                </a>
+                            `).join("")}
+
+                        </div>
+                    `;
+
+                }
+
+
+                // Display AI answer
+
+                const answerMessage = document.createElement("div");
+
+                answerMessage.className = "message";
+
+
+                answerMessage.innerHTML = `
+
+                    <div class="answer">
+
+                        <strong>AI Research Agent</strong>
+
+                        <p>
+                            ${escapeHtml(data.answer)}
+                        </p>
+
+                        ${sourcesHTML}
+
+                    </div>
+
+                `;
+
+
+                chat.appendChild(answerMessage);
+
+
+                chat.scrollTop = chat.scrollHeight;
+
+
+            }
+
+            catch (error) {
+
+                loading.style.display = "none";
+
+                showError(
+                    "Something went wrong. Please try again."
+                );
+
+                console.error(error);
+
+            }
+
+        }
+
+
+        function showError(message) {
+
+            const chat = document.getElementById("chat");
+
+            const errorMessage = document.createElement("div");
+
+            errorMessage.className = "message";
+
+
+            errorMessage.innerHTML = `
+
+                <div class="answer">
+
+                    <strong>Error</strong>
+
+                    <p>
+                        ${escapeHtml(message)}
+                    </p>
+
+                </div>
+
+            `;
+
+
+            chat.appendChild(errorMessage);
+
+        }
+
+
+        function newChat() {
+
+            const chat = document.getElementById("chat");
+
+
+            chat.innerHTML = `
+
+                <div class="welcome" id="welcome">
+
+                    <h1>
+                        What do you want to research?
+                    </h1>
+
+                    <p>
+                        Ask a question and I'll search the web for you.
+                    </p>
+
+                </div>
+
+            `;
+
+        }
+
+
+        function escapeHtml(text) {
+
+            const div = document.createElement("div");
+
+            div.textContent = text;
+
+            return div.innerHTML;
+
+        }
+
+    </script>
+
+</body>
+</html>
